@@ -1,0 +1,20 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Uploads folder
+uploads/
+
+# Logs
+logs/
+*.log
+
+# Build files (if using a bundler or compiler for production)
+build/
+
+# IDE and editor settings
+.vscode/
+.idea/
+*.swp
