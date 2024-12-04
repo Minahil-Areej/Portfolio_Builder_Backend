@@ -50,6 +50,10 @@ app.use('/api/portfolios', auth, portfolioRoutes);
 app.use('/api/portfolios/assessor', auth, isAssessor, portfolioRoutes); // Routes meant for assessors
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
+// Root route
+app.get('/', (req, res) => {
+  res.send('Welcome to Portfolio Builder Backend!');
+});
 
 // MongoDB connection
 mongoose
