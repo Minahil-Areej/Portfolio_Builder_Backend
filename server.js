@@ -48,6 +48,8 @@ app.use('/api/users', userRoutes);
 // Apply the auth middleware only to protected portfolio routes
 app.use('/api/portfolios', auth, portfolioRoutes);
 app.use('/api/portfolios/assessor', auth, isAssessor, portfolioRoutes); // Routes meant for assessors
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+
 
 // MongoDB connection
 mongoose
