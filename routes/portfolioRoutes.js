@@ -220,6 +220,130 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+//working fine locally
+// router.get('/:id/export-pdf', async (req, res) => {
+//   try {
+//     const portfolio = await Portfolio.findById(req.params.id);
+
+//     if (!portfolio) {
+//       return res.status(404).json({ message: 'Portfolio not found' });
+//     }
+
+//     // Create a new PDF Document
+//     const pdfDoc = await PDFDocument.create();
+//     let page = pdfDoc.addPage([600, 800]);
+
+//     // Define initial Y position and margin
+//     let imageY = 750;
+//     const margin = 50;
+//     const contentSpacing = 20;
+
+//     // Add portfolio title and details
+//     page.drawText(portfolio.title, { x: margin, y: imageY, size: 18 });
+//     imageY -= 30;
+//     page.drawText(`Unit: ${portfolio.unit?.number} - ${portfolio.unit?.title || ''}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`Criteria: ${portfolio.criteria?.number} - ${portfolio.criteria?.description || ''}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`Statement: ${portfolio.statement}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`Postcode: ${portfolio.postcode}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`Comments: ${portfolio.comments || 'N/A'}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 40; // Add some extra space before the images
+
+//     // Function to add a new page if no space is left
+//     const checkPageSpace = () => {
+//       if (imageY < 100) {
+//         page = pdfDoc.addPage([600, 800]);
+//         imageY = 750;
+//       }
+//     };
+
+//     // Loop through and embed images
+// for (const image of portfolio.images) {
+//   const imagePath = path.join(__dirname, '..', image);
+//   const imageBuffer = fs.readFileSync(imagePath);
+
+//   // Use Sharp to handle rotation based on EXIF metadata
+//   const { data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true });
+
+//   // Handle JPG and PNG files based on output format after correction
+//   let pdfImage;
+//   if (info.format === 'png') {
+//       pdfImage = await pdfDoc.embedPng(correctedImageBuffer);
+//   } else if (info.format === 'jpeg') {
+//       pdfImage = await pdfDoc.embedJpg(correctedImageBuffer);
+//   } else {
+//       console.error('Unsupported image format');
+//       continue; // Skip unsupported images
+//   }
+
+//   // Define a fixed width for all images
+//   const fixedWidth = 200;
+//   const imageDims = pdfImage.scale(fixedWidth / pdfImage.width); // Scale image to fixed width
+
+//   // Check if there's enough space on the current page
+//   if (imageY - imageDims.height < 100) { // Adjust to provide space for logo
+//       // Draw the logo on the current page before adding a new page
+//       const logoImage = await embedLogoImage(pdfDoc);
+//       page.drawImage(logoImage, {
+//           x: page.getWidth() - 150,
+//           y: 30,
+//           width: 100,
+//           height: 50,
+//       });
+
+//       // Add a new page if there's not enough space
+//       page = pdfDoc.addPage([600, 800]);
+//       imageY = 750;
+//   }
+
+//   // Center the image horizontally
+//   page.drawImage(pdfImage, {
+//       x: (600 - imageDims.width) / 2, // Center the image horizontally
+//       y: imageY - imageDims.height,
+//       width: imageDims.width,
+//       height: imageDims.height,
+//   });
+
+//   // Update the Y position for the next image
+//   imageY -= imageDims.height + contentSpacing;
+// }
+
+// // Draw the Cranbrook College logo at the bottom right of the last page
+// const logoImage = await embedLogoImage(pdfDoc);
+// page.drawImage(logoImage, {
+//   x: page.getWidth() - 150,
+//   y: 30,
+//   width: 100,
+//   height: 50,
+// });
+
+// // Function to embed the logo image
+// async function embedLogoImage(pdfDoc) {
+//   const logoPath = path.join(__dirname, '..', 'uploads', 'cranbrook-college-logo.png');
+//   const logoBuffer = fs.readFileSync(logoPath);
+//   return await pdfDoc.embedPng(logoBuffer);
+// }
+
+
+
+
+//     // Serialize the PDFDocument to bytes
+//     const pdfBytes = await pdfDoc.save();
+
+//     // Send the PDF to the client
+//     res.set({
+//       'Content-Type': 'application/pdf',
+//       'Content-Disposition': `attachment; filename="${portfolio.title}.pdf"`,
+//     });
+//     res.send(Buffer.from(pdfBytes));
+//   } catch (error) {
+//     console.error('Error exporting PDF:', error);
+//     res.status(500).json({ message: 'Error exporting PDF' });
+//   }
+// });
 router.get('/:id/export-pdf', async (req, res) => {
   try {
     const portfolio = await Portfolio.findById(req.params.id);
@@ -321,10 +445,15 @@ page.drawImage(logoImage, {
 
 // Function to embed the logo image
 async function embedLogoImage(pdfDoc) {
-  const logoPath = path.join(__dirname, '..', 'uploads', 'cranbrook-college-logo.png');
+  const logoPath = path.join(__dirname, '../public/assets/cranbrook-college-logo.png');
+  if (!fs.existsSync(logoPath)) {
+      console.error('Logo file does not exist at:', logoPath);
+      throw new Error('Logo file not found');
+  }
   const logoBuffer = fs.readFileSync(logoPath);
   return await pdfDoc.embedPng(logoBuffer);
 }
+
 
 
 

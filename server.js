@@ -53,6 +53,7 @@ app.use('/api/portfolios/assessor', auth, isAssessor, portfolioRoutes); // Route
 //app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 //app.use('/uploads', express.static('uploads'));
 app.use('/uploads', express.static('uploads'));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
