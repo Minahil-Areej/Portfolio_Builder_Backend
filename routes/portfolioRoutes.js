@@ -10,12 +10,21 @@ const sharp = require('sharp'); // Import Sharp for image processing
 const fs = require('fs');
 
 // Configure Multer for image uploads
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'uploads/');
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, Date.now() + path.extname(file.originalname)); // Add unique filename
+//   },
+// });
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+      const uploadPath = path.join(__dirname, '../uploads'); // Ensure correct path to 'uploads'
+      cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Add unique filename
+      cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
   },
 });
 
