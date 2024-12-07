@@ -142,7 +142,8 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
     // Add new images if any
     let newImages = [];
     if (req.files && req.files.length > 0) {
-      newImages = req.files.map((file) => file.path);
+      newImages = req.files.map((file) => `uploads/${file.filename}`); // Save relative path
+
     }
 
     // Merge existing and new images
