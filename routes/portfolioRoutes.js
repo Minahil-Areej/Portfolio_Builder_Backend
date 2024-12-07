@@ -49,7 +49,9 @@ router.post('/save', upload.array('images', 10), async (req, res) => {
     console.log('Learning Outcome:', parsedLearningOutcome);
     console.log('Criteria:', parsedCriteria);
 
-    const images = req.files.map((file) => file.path); // Get file paths for images
+   // const images = req.files.map((file) => file.path); // Get file paths for images
+   const images = req.files.map((file) => `uploads/${file.filename}`); // Save relative path
+
 
     console.log('Received Images:', req.files);
     const portfolio = new Portfolio({

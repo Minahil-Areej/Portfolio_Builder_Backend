@@ -52,6 +52,8 @@ app.use('/api/portfolios', auth, portfolioRoutes);
 app.use('/api/portfolios/assessor', auth, isAssessor, portfolioRoutes); // Routes meant for assessors
 //app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 //app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static('uploads'));
+
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
