@@ -18,17 +18,32 @@ const fs = require('fs');
 //     cb(null, Date.now() + path.extname(file.originalname)); // Add unique filename
 //   },
 // });
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//       const uploadPath = path.join(__dirname, '../uploads'); // Ensure correct path to 'uploads'
+//       cb(null, uploadPath);
+//   },
+//   filename: function (req, file, cb) {
+//       cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+//   },
+// });
+
+// const upload = multer({ storage: storage });
+
+const multer = require('multer');
+const path = require('path');
+
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-      const uploadPath = path.join(__dirname, '../uploads'); // Ensure correct path to 'uploads'
-      cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-      cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-  },
+    destination: function (req, file, cb) {
+        cb(null, '/opt/uploads'); // Mount path of the persistent disk
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+    },
 });
 
 const upload = multer({ storage: storage });
+
 
 // Create a new portfolio (Protected Route)
 router.post('/save', upload.array('images', 10), async (req, res) => {

@@ -52,7 +52,8 @@ app.use('/api/portfolios', auth, portfolioRoutes);
 app.use('/api/portfolios/assessor', auth, isAssessor, portfolioRoutes); // Routes meant for assessors
 //app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 //app.use('/uploads', express.static('uploads'));
-app.use('/uploads', express.static('uploads'));
+// app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static('/opt/uploads')); // Serve images from persistent disk
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 const uploadDir = path.join(__dirname, 'uploads');
