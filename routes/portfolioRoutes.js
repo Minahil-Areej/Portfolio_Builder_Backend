@@ -399,7 +399,13 @@ router.get('/:id/export-pdf', async (req, res) => {
 
     // Loop through and embed images
 for (const image of portfolio.images) {
-  const imagePath = path.join(__dirname, '..', image);
+  const imagePath = path.resolve('/opt/uploads', path.basename(image)); // Use absolute path
+
+      if (!fs.existsSync(imagePath)) {
+        console.error('Image not found:', imagePath);
+        continue; // Skip if the image doesn't exist
+      }
+      
   const imageBuffer = fs.readFileSync(imagePath);
 
   // Use Sharp to handle rotation based on EXIF metadata
