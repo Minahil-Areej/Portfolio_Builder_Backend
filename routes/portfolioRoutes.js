@@ -30,8 +30,6 @@ const fs = require('fs');
 
 // const upload = multer({ storage: storage });
 
-const multer = require('multer');
-const path = require('path');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
