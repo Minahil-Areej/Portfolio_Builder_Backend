@@ -47,7 +47,12 @@ const upload = multer({ storage: storage });
 router.post('/save', upload.array('images', 10), async (req, res) => {
   try {
     console.log('User ID:', req.user.id);  // User ID should now be available
-    const { title, unit, criteria, learningOutcome, postcode, comments, dateTime, status } = req.body;
+    console.log('Request Body:', req.body); // Log all incoming data
+
+    const { title, unit, criteria, learningOutcome, postcode, comments, dateTime, status, taskDescription,
+      jobType,
+      reasonForTask,
+      objectiveOfJob, } = req.body;
 
     if (!title || !unit || !criteria) {
       return res.status(400).json({ message: 'Missing required fields' });
@@ -65,6 +70,11 @@ router.post('/save', upload.array('images', 10), async (req, res) => {
    // const images = req.files.map((file) => file.path); // Get file paths for images
    const images = req.files.map((file) => `uploads/${file.filename}`); // Save relative path
 
+   console.log('New Fields:');
+   console.log('Task Description:', taskDescription);
+   console.log('Job Type:', jobType);
+   console.log('Reason for Task:', reasonForTask);
+   console.log('Objective of Job:', objectiveOfJob);
 
     console.log('Received Images:', req.files);
     const portfolio = new Portfolio({
@@ -78,6 +88,10 @@ router.post('/save', upload.array('images', 10), async (req, res) => {
       dateTime: new Date(dateTime), // Save date and time from request body 
       status: status || 'Draft', // Added: Save status as provided or default to 'Draft'
       images,
+      taskDescription,
+      jobType,
+      reasonForTask,
+      objectiveOfJob,
     });
 
     await portfolio.save();
@@ -147,7 +161,10 @@ router.get('/user-portfolios', async (req, res) => {
 // });
 router.put('/:id', upload.array('images', 10), async (req, res) => {
   try {
-    const { title, unit, learningOutcome, criteria, postcode, statement, comments, existingImages, status } = req.body;
+    const { title, unit, learningOutcome, criteria, postcode, statement, comments, existingImages, status, taskDescription,
+      jobType,
+      reasonForTask,
+      objectiveOfJob, } = req.body;
 
     // Parse the existing images from the request body
     let previousImages = existingImages ? JSON.parse(existingImages) : [];
@@ -179,6 +196,10 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
       comments: comments || currentPortfolio.comments,
       images: newImages.length > 0 ? updatedImages : currentPortfolio.images, // Update images only if new ones are provided
       status: status || currentPortfolio.status, // Update status if provided
+      taskDescription: taskDescription || currentPortfolio.taskDescription,
+      jobType: jobType || currentPortfolio.jobType,
+      reasonForTask: reasonForTask || currentPortfolio.reasonForTask,
+      objectiveOfJob: objectiveOfJob || currentPortfolio.objectiveOfJob,
     };
 
     // Increment submission count if transitioning from Reviewed to Draft

@@ -35,6 +35,11 @@ const PortfolioSchema = new mongoose.Schema({
   assessorComments: { type: String },  // New field for Assessor feedback
   status: { type: String, default: 'To Be Reviewed' },  // New field for portfolio status
   submissionCount: { type: Number, default: 0 }, // New field to track submission count
+  // New fields
+  taskDescription: { type: String }, // Description of the task
+  jobType: { type: String },         // Type of job
+  reasonForTask: { type: String },   // Reason for the task
+  objectiveOfJob: { type: String },  // Objective of the job
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
