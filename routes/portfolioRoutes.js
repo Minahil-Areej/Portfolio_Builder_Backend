@@ -161,7 +161,7 @@ router.get('/user-portfolios', async (req, res) => {
 // });
 router.put('/:id', upload.array('images', 10), async (req, res) => {
   try {
-    const { title, unit, learningOutcome, criteria, postcode, statement, comments, existingImages, status, taskDescription,
+    const { title, unit, learningOutcome, criteria, postcode, comments, existingImages, status, taskDescription,
       jobType,
       reasonForTask,
       objectiveOfJob, } = req.body;
@@ -192,7 +192,7 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
       learningOutcome: learningOutcome ? JSON.parse(learningOutcome) : currentPortfolio.learningOutcome,
       criteria: criteria ? JSON.parse(criteria) : currentPortfolio.criteria,
       postcode: postcode || currentPortfolio.postcode,
-      statement: statement || currentPortfolio.statement,
+      // statement: statement || currentPortfolio.statement,
       comments: comments || currentPortfolio.comments,
       images: newImages.length > 0 ? updatedImages : currentPortfolio.images, // Update images only if new ones are provided
       status: status || currentPortfolio.status, // Update status if provided
