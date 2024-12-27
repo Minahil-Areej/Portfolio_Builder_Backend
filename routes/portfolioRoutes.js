@@ -533,10 +533,10 @@ router.get('/:id/export-pdf', async (req, res) => {
     const contentSpacing = 20;
 
     // Add student's name
-    page.drawText(`Student Name: ${portfolio.userId?.name || 'N/A'}`, { x: margin, y: imageY, size: 14 });
+    page.drawText(`Student Name: ${portfolio.userId?.name || 'N/A'}`, { x: 200, y: imageY, size: 18 });
     imageY -= 30;
     // Add portfolio title and details
-    page.drawText(portfolio.title, { x: margin, y: imageY, size: 18 });
+    page.drawText(portfolio.title, { x: margin, y: imageY, size: 14 });
     imageY -= 30;
     page.drawText(`Unit: ${portfolio.unit?.number} - ${portfolio.unit?.title || ''}`, { x: margin, y: imageY, size: 12 });
     imageY -= 20;
