@@ -517,7 +517,7 @@ router.get('/:id', async (req, res) => {
 // });
 router.get('/:id/export-pdf', async (req, res) => {
   try {
-    const portfolio = await Portfolio.findById(req.params.id);
+    const portfolio = await Portfolio.findById(req.params.id).populate('userId', 'name'); // Populate userId to fetch the student's name
 
     if (!portfolio) {
       return res.status(404).json({ message: 'Portfolio not found' });
@@ -532,6 +532,9 @@ router.get('/:id/export-pdf', async (req, res) => {
     const margin = 50;
     const contentSpacing = 20;
 
+    // Add student's name
+    page.drawText(`Student Name: ${portfolio.userId?.name || 'N/A'}`, { x: margin, y: imageY, size: 14 });
+    imageY -= 30;
     // Add portfolio title and details
     page.drawText(portfolio.title, { x: margin, y: imageY, size: 18 });
     imageY -= 30;
@@ -539,7 +542,7 @@ router.get('/:id/export-pdf', async (req, res) => {
     imageY -= 20;
     page.drawText(`Criteria: ${portfolio.criteria?.number} - ${portfolio.criteria?.description || ''}`, { x: margin, y: imageY, size: 12 });
     imageY -= 20;
-    page.drawText(`Postcode: ${portfolio.postcode}`, { x: margin, y: imageY, size: 12 });
+    page.drawText(`Location: ${portfolio.postcode}`, { x: margin, y: imageY, size: 12 });
     imageY -= 20;
     page.drawText(`Task Description: ${portfolio.taskDescription || 'N/A'}`, { x: margin, y: imageY, size: 12 });
     imageY -= 20;
