@@ -101,17 +101,4 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.get('/', auth, async (req, res) => {
-  if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Access forbidden' });
-  }
-
-  try {
-      const users = await User.find({}, 'name email role');
-      res.status(200).json(users);
-  } catch (error) {
-      res.status(500).json({ message: 'Error fetching users' });
-  }
-});
-
 module.exports = router;
