@@ -706,12 +706,14 @@ router.get('/assessor/:id', async (req, res) => {
 router.get('/admin/all', async (req, res) => {
   try {
     console.log('Admin fetching all portfolios');
-    const portfolios = await Portfolio.find().populate('userId');
+    const portfolios = await Portfolio.find().populate('userId', 'name email'); // Populate name & email
+
     res.status(200).json(portfolios);
   } catch (error) {
     console.error('Error fetching all portfolios:', error);
     res.status(500).json({ message: 'Error fetching portfolios' });
   }
 });
+
 
 module.exports = router;
