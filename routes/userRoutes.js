@@ -101,4 +101,15 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Get all users (Admin-only)
+router.get('/', async (req, res) => {
+  try {
+      const users = await User.find({}, 'name email role'); // Fetch users but only return name, email, and role
+      res.status(200).json(users);
+  } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ message: 'Error fetching users' });
+  }
+});
+
 module.exports = router;
