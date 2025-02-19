@@ -25,7 +25,7 @@ router.post('/register', upload.single('image'), async (req, res) => {
       console.log('File:', req.file);  // Log the uploaded file
       console.log('Body:', req.body);  // Log the form data
   
-      const { name, email, password, dob, postcode, qualification, phone, referenceNo, role } = req.body;
+      const { name, email, password, dob, postcode, qualification, phone, referenceNo, role, isActive } = req.body;
       
       // Ensure the data is being captured properly
       if (!name || !email || !password) {
@@ -49,6 +49,7 @@ router.post('/register', upload.single('image'), async (req, res) => {
         referenceNo,
         role,
         image, // Save the image path in the database
+        isActive,
       });
   
       await user.save();
@@ -117,11 +118,16 @@ router.get('/', async (req, res) => {
 router.put('/deactivate/:id', async (req, res) => {
   try {
       const { isActive } = req.body;
-      const user = await User.findByIdAndUpdate(req.params.id, { isActive }, { new: true });
 
+      // Ensure user exists
+      const user = await User.findById(req.params.id);
       if (!user) {
           return res.status(404).json({ message: 'User not found' });
       }
+
+      // Update the user status
+      user.isActive = isActive;
+      await user.save(); // Ensure changes are saved to DB
 
       res.status(200).json({ message: `User ${isActive ? 'activated' : 'deactivated'} successfully`, user });
   } catch (error) {
@@ -129,6 +135,7 @@ router.put('/deactivate/:id', async (req, res) => {
       res.status(500).json({ message: 'Server error while updating user status' });
   }
 });
+
 
 
 module.exports = router;
