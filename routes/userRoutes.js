@@ -116,18 +116,19 @@ router.get('/', async (req, res) => {
 // Deactivate or Reactivate a User
 router.put('/deactivate/:id', async (req, res) => {
   try {
-    const { isActive } = req.body;
-    const user = await User.findByIdAndUpdate(req.params.id, { isActive }, { new: true });
+      const { isActive } = req.body;
+      const user = await User.findByIdAndUpdate(req.params.id, { isActive }, { new: true });
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
 
-    res.status(200).json({ message: `User ${isActive ? 'activated' : 'deactivated'} successfully`, user });
+      res.status(200).json({ message: `User ${isActive ? 'activated' : 'deactivated'} successfully`, user });
   } catch (error) {
-    console.error('Error updating user status:', error);
-    res.status(500).json({ message: 'Server error while updating user status' });
+      console.error('Error updating user status:', error);
+      res.status(500).json({ message: 'Server error while updating user status' });
   }
 });
+
 
 module.exports = router;
