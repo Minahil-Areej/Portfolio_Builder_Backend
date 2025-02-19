@@ -117,7 +117,11 @@ router.get('/', async (req, res) => {
 // Deactivate or Reactivate a User
 router.put('/deactivate/:id', async (req, res) => {
   try {
+
+    console.log(`Received request to toggle user ${req.params.id} status.`); // Log request
+        console.log('Request body:', req.body); // Log received data
       const { isActive } = req.body;
+
 
       // Ensure user exists
       const user = await User.findById(req.params.id);
@@ -128,6 +132,8 @@ router.put('/deactivate/:id', async (req, res) => {
       // Update the user status
       user.isActive = isActive;
       await user.save(); // Ensure changes are saved to DB
+
+      console.log(`User ${req.params.id} is now ${isActive ? 'Active' : 'Inactive'}`); // Log status change
 
       res.status(200).json({ message: `User ${isActive ? 'activated' : 'deactivated'} successfully`, user });
   } catch (error) {
