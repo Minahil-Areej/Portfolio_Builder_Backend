@@ -6,6 +6,7 @@ const path = require('path'); // Import the 'path' module
 const fs = require('fs');
 const userRoutes = require('./routes/userRoutes');
 const portfolioRoutes = require('./routes/portfolioRoutes');
+const applicationFormRoutes = require('./routes/applicationFormRoutes');
 const jwt = require('jsonwebtoken');
 
 dotenv.config();
@@ -50,6 +51,7 @@ app.use('/api/users', userRoutes);
 // Apply the auth middleware only to protected portfolio routes
 app.use('/api/portfolios', auth, portfolioRoutes);
 app.use('/api/portfolios/assessor', auth, isAssessor, portfolioRoutes); // Routes meant for assessors
+app.use('/api/application-form', applicationFormRoutes);
 //app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 //app.use('/uploads', express.static('uploads'));
 // app.use('/uploads', express.static('uploads'));
