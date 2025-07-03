@@ -575,8 +575,15 @@ for (const image of portfolio.images) {
   const imageBuffer = fs.readFileSync(imagePath);
 
   // Use Sharp to handle rotation based on EXIF metadata
-  const { data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true });
-
+  //const { data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true });
+  let correctedImageBuffer, info;
+  try {
+    ({ data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true }));
+  } catch (err) {
+    console.error('Skipping corrupted image:', imagePath, err.message);
+    continue; // Skip this image
+  }
+  
   // Handle JPG and PNG files based on output format after correction
   let pdfImage;
   if (info.format === 'png') {
@@ -658,6 +665,7 @@ async function embedLogoImage(pdfDoc) {
     res.status(500).json({ message: 'Error exporting PDF' });
   }
 });
+
 router.get('/assessor/portfolios', async (req, res) => {
   try {
     const portfolios = await Portfolio.find().populate('userId');  // Fetch portfolios, with user details if needed
