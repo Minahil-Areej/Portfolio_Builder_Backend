@@ -51,7 +51,7 @@ router.post('/register', upload.single('image'), async (req, res) => {
       referenceNo,
       role,
       image, // Save the image path in the database
-      isActive: false, // User inactive by default
+      isActive, // User inactive by default
     });
 
     // ✅ Send registration email
