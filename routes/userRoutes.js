@@ -27,7 +27,7 @@ router.post('/register', upload.single('image'), async (req, res) => {
     console.log('File:', req.file);  // Log the uploaded file
     console.log('Body:', req.body);  // Log the form data
 
-    const { name, email, password, dob, postcode, qualification, phone, referenceNo, role, isActive } = req.body;
+    const { name, email, password, dob, postcode, qualification, phone, referenceNo, role} = req.body;
 
     // Ensure the data is being captured properly
     if (!name || !email || !password) {
@@ -51,7 +51,6 @@ router.post('/register', upload.single('image'), async (req, res) => {
       referenceNo,
       role,
       image, // Save the image path in the database
-      isActive, // User inactive by default
     });
 
     // ✅ Send registration email
