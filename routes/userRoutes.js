@@ -51,11 +51,48 @@ router.post('/register', upload.single('image'), async (req, res) => {
       referenceNo,
       role,
       image, // Save the image path in the database
-      isActive,
+      isActive: false, // User inactive by default
     });
 
-    await user.save();
-    res.status(201).json({ message: 'User registered successfully' });
+    // ✅ Send registration email
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: `"Cranbrook College" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Thank you for registering at Cranbrook College',
+      html: `
+        <p>Dear ${name},</p>
+        <p>Thank you for registering at Cranbrook College.</p>
+        <p>We have received your application. One of our team members will review your details and activate your account shortly.</p>
+        <p>You will receive another email once your login access is granted.</p>
+        <br/>
+        <p>Best regards,</p>
+        <p><strong>Cranbrook College</strong></p>
+      `,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log('Registration email sent');
+      await user.save();
+      res.status(201).json({ message: 'Registration successful. Please wait for admin approval.' });
+    } catch (emailError) {
+      console.error('Email error:', emailError);
+      await user.save();
+      // Notify user that registration succeeded but email failed
+      res.status(201).json({
+        message: 'Registration successful, but we could not send a confirmation email. Please contact support if you do not receive further updates.'
+      });
+    }
+
+    //res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     console.error('Error during registration:', err); // Log the full error
     res.status(500).json({ error: err.message });
