@@ -34,6 +34,12 @@ router.post('/register', upload.single('image'), async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Please enter a valid email address.' });
+    }
+
     const image = req.file ? req.file.path : null; // Check if the file is being processed
 
     // Hash the password
@@ -81,13 +87,15 @@ router.post('/register', upload.single('image'), async (req, res) => {
       await transporter.sendMail(mailOptions);
       console.log('Registration email sent');
       await user.save();
-      res.status(201).json({ message: 'Registration successful. Please wait for admin approval.' });
+      res.status(201).json({ 
+        message: 'Registration successful. If your email is correct, you will receive a confirmation email.' 
+      });
     } catch (emailError) {
       console.error('Email error:', emailError);
       await user.save();
-      // Notify user that registration succeeded but email failed
+      // Still show generic message - don't reveal email failure
       res.status(201).json({
-        message: 'Registration successful, but we could not send a confirmation email. Please contact support if you do not receive further updates.'
+        message: 'Registration successful. If your email is correct, you will receive a confirmation email.'
       });
     }
 
