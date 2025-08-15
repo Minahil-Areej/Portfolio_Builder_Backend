@@ -5,6 +5,7 @@ const path = require('path');
 const Portfolio = require('../models/Portfolio');
 const mongoose = require('mongoose'); // Add this line
 const puppeteer = require('puppeteer'); // Import puppeteer
+const User = require('../models/User'); // Add this import at the top
 const { PDFDocument, rgb } = require('pdf-lib');
 const sharp = require('sharp'); // Import Sharp for image processing
 const fs = require('fs');
@@ -682,7 +683,7 @@ router.get('/assessor-portfolios/:assessorId', async (req, res) => {
     const { assessorId } = req.params;
     
     // Get students assigned to this assessor
-    const User = require('../models/User'); // Add this import at the top
+    
     const assignedStudents = await User.find({ 
       assignedAssessor: assessorId,
       role: 'student',
