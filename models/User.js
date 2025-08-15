@@ -14,6 +14,7 @@ const UserSchema = new mongoose.Schema({
   image: { type: String }, // Path to the uploaded image
   createdAt: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: false }, // New field to check if the user is active or deactivated
+  assignedAssessor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // New field
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
 });

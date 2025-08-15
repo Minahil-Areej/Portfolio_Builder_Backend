@@ -266,5 +266,36 @@ router.post('/reset-password/:token', async (req, res) => {
   }
 });
 
+// Get all assessors for assignment dropdown
+router.get('/assessors', async (req, res) => {
+  try {
+    const assessors = await User.find({ role: 'assessor', isActive: true }, 'name email');
+    res.status(200).json(assessors);
+  } catch (error) {
+    console.error('Error fetching assessors:', error);
+    res.status(500).json({ message: 'Error fetching assessors' });
+  }
+});
+
+// Assign assessor to student
+router.put('/assign-assessor/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { assessorId } = req.body;
+
+    const student = await User.findById(studentId);
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    student.assignedAssessor = assessorId;
+    await student.save();
+
+    res.status(200).json({ message: 'Assessor assigned successfully' });
+  } catch (error) {
+    console.error('Error assigning assessor:', error);
+    res.status(500).json({ message: 'Error assigning assessor' });
+  }
+});
 
 module.exports = router;

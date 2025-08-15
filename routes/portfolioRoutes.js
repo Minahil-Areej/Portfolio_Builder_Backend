@@ -666,15 +666,41 @@ async function embedLogoImage(pdfDoc) {
   }
 });
 
-router.get('/assessor/portfolios', async (req, res) => {
+// router.get('/assessor/portfolios', async (req, res) => {
+//   try {
+//     const portfolios = await Portfolio.find().populate('userId');  // Fetch portfolios, with user details if needed
+//     res.status(200).json(portfolios);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Error fetching portfolios' });
+//   }
+// });
+
+
+// Replace your existing `/assessor/portfolios` route with this:
+router.get('/assessor-portfolios/:assessorId', async (req, res) => {
   try {
-    const portfolios = await Portfolio.find().populate('userId');  // Fetch portfolios, with user details if needed
+    const { assessorId } = req.params;
+    
+    // Get students assigned to this assessor
+    const User = require('../models/User'); // Add this import at the top
+    const assignedStudents = await User.find({ 
+      assignedAssessor: assessorId,
+      role: 'student',
+      isActive: true 
+    }).select('_id');
+    
+    const studentIds = assignedStudents.map(student => student._id);
+    
+    // Get portfolios of assigned students only
+    const portfolios = await Portfolio.find({ userId: { $in: studentIds } })
+      .populate('userId', 'name email');
+    
     res.status(200).json(portfolios);
   } catch (error) {
+    console.error('Error fetching assessor portfolios:', error);
     res.status(500).json({ message: 'Error fetching portfolios' });
   }
 });
-
 
 router.post('/:id/feedback', async (req, res) => {
   const { assessorComments, status } = req.body;
