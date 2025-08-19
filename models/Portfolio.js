@@ -33,7 +33,22 @@ const PortfolioSchema = new mongoose.Schema({
     },
   ],
   assessorComments: { type: String },  // New field for Assessor feedback
-  status: { type: String, default: 'To Be Reviewed' },  // New field for portfolio status
+  status: { 
+    type: String, 
+    enum: ['Draft', 'To Be Reviewed', 'Reviewed', 'Rejected', 'Approved'],
+    default: 'Draft' 
+  },
+  statusHistory: [{
+    status: String,
+    changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    date: { type: Date, default: Date.now },
+    comments: String
+  }],
+  linkedCriteria: [{
+    unitNumber: String,
+    learningOutcome: String,
+    criteriaNumber: String
+  }],
   submissionCount: { type: Number, default: 0 }, // New field to track submission count
   // New fields
   taskDescription: { type: String }, // Description of the task
