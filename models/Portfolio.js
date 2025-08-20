@@ -33,23 +33,8 @@ const PortfolioSchema = new mongoose.Schema({
     },
   ],
   assessorComments: { type: String },  // New field for Assessor feedback
-  status: { 
-    type: String, 
-    enum: ['Draft', 'To Be Reviewed', 'Reviewed', 'Done'], // Updated to match Dashboard statuses
-    default: 'Draft' 
-  },
-  statusHistory: [{
-    status: String,
-    changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    date: { type: Date, default: Date.now },
-    comments: String
-  }],
+  status: { type: String, default: 'To Be Reviewed' },
   submissionCount: { type: Number, default: 0 },
-  linkedCriteria: [{
-    unitNumber: String,
-    learningOutcome: String,
-    criteriaNumber: String
-  }],
   // New fields
   taskDescription: { type: String }, // Description of the task
   jobType: { type: String },         // Type of job
@@ -57,18 +42,6 @@ const PortfolioSchema = new mongoose.Schema({
   objectiveOfJob: { type: String },  // Objective of the job
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-});
-
-// Add a pre-save middleware to update statusHistory
-PortfolioSchema.pre('save', function(next) {
-  if (this.isModified('status')) {
-    this.statusHistory.push({
-      status: this.status,
-      date: new Date(),
-      changedBy: this.userId // Assuming userId is set when updating status
-    });
-  }
-  next();
 });
 
 module.exports = mongoose.model('Portfolio', PortfolioSchema);
