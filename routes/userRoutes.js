@@ -22,8 +22,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-const jwt = require('jsonwebtoken');
-
 // local copy of auth middleware (same as in server.js)
 const auth = (req, res, next) => {
   const token = req.header('Authorization')?.split(' ')[1];
