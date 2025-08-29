@@ -21,6 +21,23 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+
+const jwt = require('jsonwebtoken');
+
+// local copy of auth middleware (same as in server.js)
+const auth = (req, res, next) => {
+  const token = req.header('Authorization')?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // attach { id, role } to req.user
+    next();
+  } catch (err) {
+    return res.status(403).json({ message: 'Invalid token' });
+  }
+};
+
 // Register user with image upload
 router.post('/register', upload.single('image'), async (req, res) => {
   try {
