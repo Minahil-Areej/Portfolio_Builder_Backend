@@ -301,4 +301,18 @@ router.put('/assign-assessor/:studentId', async (req, res) => {
   }
 });
 
+// Get the currently logged-in user's details
+router.get('/me', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('name email role');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error('Error fetching current user:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
