@@ -53,7 +53,8 @@ router.post('/save', upload.array('images', 10), async (req, res) => {
     const { title, unit, criteria, learningOutcome, postcode, comments, dateTime, status, taskDescription,
       jobType,
       reasonForTask,
-      objectiveOfJob, } = req.body;
+      objectiveOfJob,
+      Method } = req.body;
 
     if (!title || !unit || !criteria) {
       return res.status(400).json({ message: 'Missing required fields' });
@@ -93,6 +94,7 @@ router.post('/save', upload.array('images', 10), async (req, res) => {
       jobType,
       reasonForTask,
       objectiveOfJob,
+      Method,
     });
 
     await portfolio.save();
@@ -165,7 +167,8 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
     const { title, unit, learningOutcome, criteria, postcode, comments, existingImages, status, taskDescription,
       jobType,
       reasonForTask,
-      objectiveOfJob, } = req.body;
+      objectiveOfJob,
+      Method } = req.body;
 
     // Parse the existing images from the request body
     let previousImages = existingImages ? JSON.parse(existingImages) : [];
@@ -201,6 +204,7 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
       jobType: jobType || currentPortfolio.jobType,
       reasonForTask: reasonForTask || currentPortfolio.reasonForTask,
       objectiveOfJob: objectiveOfJob || currentPortfolio.objectiveOfJob,
+      Method: Method || currentPortfolio.Method,
     };
 
     // Increment submission count if transitioning from Reviewed to Draft
@@ -542,6 +546,8 @@ router.get('/:id/export-pdf', async (req, res) => {
     page.drawText(`Unit: ${portfolio.unit?.number} - ${portfolio.unit?.title || ''}`, { x: margin, y: imageY, size: 12 });
     imageY -= 20;
     page.drawText(`Criteria: ${portfolio.criteria?.number} - ${portfolio.criteria?.description || ''}`, { x: margin, y: imageY, size: 12 });
+    imageY -= 20;
+    page.drawText(`Method: ${portfolio.Method || 'N/A'}`, { x: margin, y: imageY, size: 12 });
     imageY -= 20;
     page.drawText(`Location: ${portfolio.postcode}`, { x: margin, y: imageY, size: 12 });
     imageY -= 20;
