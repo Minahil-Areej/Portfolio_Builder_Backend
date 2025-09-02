@@ -77,6 +77,7 @@ router.post('/save', upload.array('images', 10), async (req, res) => {
    console.log('Job Type:', jobType);
    console.log('Reason for Task:', reasonForTask);
    console.log('Objective of Job:', objectiveOfJob);
+   console.log('Method:', Method);
 
     console.log('Received Images:', req.files);
     const portfolio = new Portfolio({
