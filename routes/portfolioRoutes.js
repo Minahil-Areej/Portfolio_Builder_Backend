@@ -54,7 +54,7 @@ router.post('/save', upload.array('images', 10), async (req, res) => {
       jobType,
       reasonForTask,
       objectiveOfJob,
-      Method } = req.body;
+      method } = req.body;
 
     if (!title || !unit || !criteria) {
       return res.status(400).json({ message: 'Missing required fields' });
@@ -77,7 +77,7 @@ router.post('/save', upload.array('images', 10), async (req, res) => {
    console.log('Job Type:', jobType);
    console.log('Reason for Task:', reasonForTask);
    console.log('Objective of Job:', objectiveOfJob);
-   console.log('Method:', Method);
+   console.log('method:', method);
 
     console.log('Received Images:', req.files);
     const portfolio = new Portfolio({
@@ -95,7 +95,7 @@ router.post('/save', upload.array('images', 10), async (req, res) => {
       jobType,
       reasonForTask,
       objectiveOfJob,
-      Method,
+      method,
     });
 
     await portfolio.save();
@@ -169,7 +169,7 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
       jobType,
       reasonForTask,
       objectiveOfJob,
-      Method } = req.body;
+      method } = req.body;
 
     // Parse the existing images from the request body
     let previousImages = existingImages ? JSON.parse(existingImages) : [];
@@ -205,7 +205,7 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
       jobType: jobType || currentPortfolio.jobType,
       reasonForTask: reasonForTask || currentPortfolio.reasonForTask,
       objectiveOfJob: objectiveOfJob || currentPortfolio.objectiveOfJob,
-      Method: Method || currentPortfolio.Method,
+      method: method || currentPortfolio.method,
     };
 
     // Increment submission count if transitioning from Reviewed to Draft
@@ -548,7 +548,7 @@ router.get('/:id/export-pdf', async (req, res) => {
     imageY -= 20;
     page.drawText(`Criteria: ${portfolio.criteria?.number} - ${portfolio.criteria?.description || ''}`, { x: margin, y: imageY, size: 12 });
     imageY -= 20;
-    page.drawText(`Method: ${portfolio.Method || 'N/A'}`, { x: margin, y: imageY, size: 12 });
+    page.drawText(`method: ${portfolio.method || 'N/A'}`, { x: margin, y: imageY, size: 12 });
     imageY -= 20;
     page.drawText(`Location: ${portfolio.postcode}`, { x: margin, y: imageY, size: 12 });
     imageY -= 20;

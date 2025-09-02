@@ -42,7 +42,7 @@ const PortfolioSchema = new mongoose.Schema({
   objectiveOfJob: { type: String },  // Objective of the job
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-  Method: { type: String, default: '' }, // Add the new field
+  method: { type: String, default: '' }, // Add the new field
 });
 
 module.exports = mongoose.model('Portfolio', PortfolioSchema);
