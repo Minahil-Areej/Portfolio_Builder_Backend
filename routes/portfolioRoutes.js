@@ -33,12 +33,12 @@ const fs = require('fs');
 
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, '/opt/uploads'); // Mount path of the persistent disk
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-    },
+  destination: function (req, file, cb) {
+    cb(null, '/opt/uploads'); // Mount path of the persistent disk
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+  },
 });
 
 const upload = multer({ storage: storage });
@@ -69,15 +69,15 @@ router.post('/save', upload.array('images', 10), async (req, res) => {
     console.log('Learning Outcome:', parsedLearningOutcome);
     console.log('Criteria:', parsedCriteria);
 
-   // const images = req.files.map((file) => file.path); // Get file paths for images
-   const images = req.files.map((file) => `uploads/${file.filename}`); // Save relative path
+    // const images = req.files.map((file) => file.path); // Get file paths for images
+    const images = req.files.map((file) => `uploads/${file.filename}`); // Save relative path
 
-   console.log('New Fields:');
-   console.log('Task Description:', taskDescription);
-   console.log('Job Type:', jobType);
-   console.log('Reason for Task:', reasonForTask);
-   console.log('Objective of Job:', objectiveOfJob);
-   console.log('method:', method);
+    console.log('New Fields:');
+    console.log('Task Description:', taskDescription);
+    console.log('Job Type:', jobType);
+    console.log('Reason for Task:', reasonForTask);
+    console.log('Objective of Job:', objectiveOfJob);
+    console.log('method:', method);
 
     console.log('Received Images:', req.files);
     const portfolio = new Portfolio({
@@ -283,14 +283,15 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
         : currentPortfolio.learningOutcome,
       criteria: criteria ? JSON.parse(criteria) : currentPortfolio.criteria,
       postcode: postcode || currentPortfolio.postcode,
-      comments: comments || currentPortfolio.comments,
       images: updatedImages,
       status: status || currentPortfolio.status,
-      taskDescription: taskDescription || currentPortfolio.taskDescription,
-      jobType: jobType || currentPortfolio.jobType,
-      reasonForTask: reasonForTask || currentPortfolio.reasonForTask,
-      objectiveOfJob: objectiveOfJob || currentPortfolio.objectiveOfJob,
-      method: method || currentPortfolio.method,
+      jobType: jobType !== undefined ? jobType : currentPortfolio.jobType,
+      reasonForTask: reasonForTask !== undefined ? reasonForTask : currentPortfolio.reasonForTask,
+      objectiveOfJob: objectiveOfJob !== undefined ? objectiveOfJob : currentPortfolio.objectiveOfJob,
+      taskDescription: taskDescription !== undefined ? taskDescription : currentPortfolio.taskDescription,
+      method: method !== undefined ? method : currentPortfolio.method,
+      comments: comments !== undefined ? comments : currentPortfolio.comments,
+
     };
 
     // Increment submission count if transitioning from Reviewed to Draft
@@ -527,7 +528,7 @@ router.get('/:id', async (req, res) => {
 //         console.error('Image not found:', imagePath);
 //         continue; // Skip if the image doesn't exist
 //       }
-      
+
 //   const imageBuffer = fs.readFileSync(imagePath);
 
 //   // Use Sharp to handle rotation based on EXIF metadata
@@ -665,88 +666,88 @@ router.get('/:id/export-pdf', async (req, res) => {
     };
 
     // Loop through and embed images
-for (const image of portfolio.images) {
-  const imagePath = path.resolve('/opt/uploads', path.basename(image)); // Use absolute path
+    for (const image of portfolio.images) {
+      const imagePath = path.resolve('/opt/uploads', path.basename(image)); // Use absolute path
 
       if (!fs.existsSync(imagePath)) {
         console.error('Image not found:', imagePath);
         continue; // Skip if the image doesn't exist
       }
-      
-  const imageBuffer = fs.readFileSync(imagePath);
 
-  // Use Sharp to handle rotation based on EXIF metadata
-  //const { data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true });
-  let correctedImageBuffer, info;
-  try {
-    ({ data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true }));
-  } catch (err) {
-    console.error('Skipping corrupted image:', imagePath, err.message);
-    continue; // Skip this image
-  }
-  
-  // Handle JPG and PNG files based on output format after correction
-  let pdfImage;
-  if (info.format === 'png') {
-      pdfImage = await pdfDoc.embedPng(correctedImageBuffer);
-  } else if (info.format === 'jpeg') {
-      pdfImage = await pdfDoc.embedJpg(correctedImageBuffer);
-  } else {
-      console.error('Unsupported image format');
-      continue; // Skip unsupported images
-  }
+      const imageBuffer = fs.readFileSync(imagePath);
 
-  // Define a fixed width for all images
-  const fixedWidth = 200;
-  const imageDims = pdfImage.scale(fixedWidth / pdfImage.width); // Scale image to fixed width
+      // Use Sharp to handle rotation based on EXIF metadata
+      //const { data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true });
+      let correctedImageBuffer, info;
+      try {
+        ({ data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true }));
+      } catch (err) {
+        console.error('Skipping corrupted image:', imagePath, err.message);
+        continue; // Skip this image
+      }
 
-  // Check if there's enough space on the current page
-  if (imageY - imageDims.height < 100) { // Adjust to provide space for logo
-      // Draw the logo on the current page before adding a new page
-      const logoImage = await embedLogoImage(pdfDoc);
-      page.drawImage(logoImage, {
+      // Handle JPG and PNG files based on output format after correction
+      let pdfImage;
+      if (info.format === 'png') {
+        pdfImage = await pdfDoc.embedPng(correctedImageBuffer);
+      } else if (info.format === 'jpeg') {
+        pdfImage = await pdfDoc.embedJpg(correctedImageBuffer);
+      } else {
+        console.error('Unsupported image format');
+        continue; // Skip unsupported images
+      }
+
+      // Define a fixed width for all images
+      const fixedWidth = 200;
+      const imageDims = pdfImage.scale(fixedWidth / pdfImage.width); // Scale image to fixed width
+
+      // Check if there's enough space on the current page
+      if (imageY - imageDims.height < 100) { // Adjust to provide space for logo
+        // Draw the logo on the current page before adding a new page
+        const logoImage = await embedLogoImage(pdfDoc);
+        page.drawImage(logoImage, {
           x: page.getWidth() - 150,
           y: 30,
           width: 100,
           height: 50,
+        });
+
+        // Add a new page if there's not enough space
+        page = pdfDoc.addPage([600, 800]);
+        imageY = 750;
+      }
+
+      // Center the image horizontally
+      page.drawImage(pdfImage, {
+        x: (600 - imageDims.width) / 2, // Center the image horizontally
+        y: imageY - imageDims.height,
+        width: imageDims.width,
+        height: imageDims.height,
       });
 
-      // Add a new page if there's not enough space
-      page = pdfDoc.addPage([600, 800]);
-      imageY = 750;
-  }
+      // Update the Y position for the next image
+      imageY -= imageDims.height + contentSpacing;
+    }
 
-  // Center the image horizontally
-  page.drawImage(pdfImage, {
-      x: (600 - imageDims.width) / 2, // Center the image horizontally
-      y: imageY - imageDims.height,
-      width: imageDims.width,
-      height: imageDims.height,
-  });
+    // Draw the Cranbrook College logo at the bottom right of the last page
+    const logoImage = await embedLogoImage(pdfDoc);
+    page.drawImage(logoImage, {
+      x: page.getWidth() - 150,
+      y: 30,
+      width: 100,
+      height: 50,
+    });
 
-  // Update the Y position for the next image
-  imageY -= imageDims.height + contentSpacing;
-}
-
-// Draw the Cranbrook College logo at the bottom right of the last page
-const logoImage = await embedLogoImage(pdfDoc);
-page.drawImage(logoImage, {
-  x: page.getWidth() - 150,
-  y: 30,
-  width: 100,
-  height: 50,
-});
-
-// Function to embed the logo image
-async function embedLogoImage(pdfDoc) {
-  const logoPath = path.join(__dirname, '../public/assets/cranbrook-college-logo.png');
-  if (!fs.existsSync(logoPath)) {
-      console.error('Logo file does not exist at:', logoPath);
-      throw new Error('Logo file not found');
-  }
-  const logoBuffer = fs.readFileSync(logoPath);
-  return await pdfDoc.embedPng(logoBuffer);
-}
+    // Function to embed the logo image
+    async function embedLogoImage(pdfDoc) {
+      const logoPath = path.join(__dirname, '../public/assets/cranbrook-college-logo.png');
+      if (!fs.existsSync(logoPath)) {
+        console.error('Logo file does not exist at:', logoPath);
+        throw new Error('Logo file not found');
+      }
+      const logoBuffer = fs.readFileSync(logoPath);
+      return await pdfDoc.embedPng(logoBuffer);
+    }
 
 
 
@@ -781,21 +782,21 @@ async function embedLogoImage(pdfDoc) {
 router.get('/assessor-portfolios/:assessorId', async (req, res) => {
   try {
     const { assessorId } = req.params;
-    
+
     // Get students assigned to this assessor
-    
-    const assignedStudents = await User.find({ 
+
+    const assignedStudents = await User.find({
       assignedAssessor: assessorId,
       role: 'student',
-      isActive: true 
+      isActive: true
     }).select('_id');
-    
+
     const studentIds = assignedStudents.map(student => student._id);
-    
+
     // Get portfolios of assigned students only
     const portfolios = await Portfolio.find({ userId: { $in: studentIds } })
       .populate('userId', 'name email');
-    
+
     res.status(200).json(portfolios);
   } catch (error) {
     console.error('Error fetching assessor portfolios:', error);
