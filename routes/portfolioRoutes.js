@@ -615,78 +615,406 @@ router.get('/:id', async (req, res) => {
 //     res.status(500).json({ message: 'Error exporting PDF' });
 //   }
 // });
+
+
+//*************8PERFECT ROUTE BEFORE CLAUDE UI
+// router.get('/:id/export-pdf', async (req, res) => {
+//   try {
+//     const portfolio = await Portfolio.findById(req.params.id).populate('userId', 'name'); // Populate userId to fetch the student's name
+
+//     if (!portfolio) {
+//       return res.status(404).json({ message: 'Portfolio not found' });
+//     }
+
+//     // Create a new PDF Document
+//     const pdfDoc = await PDFDocument.create();
+//     let page = pdfDoc.addPage([600, 800]);
+
+//     // Define initial Y position and margin
+//     let imageY = 750;
+//     const margin = 50;
+//     const contentSpacing = 20;
+
+//     // Add student's name
+//     page.drawText(`Student Name: ${portfolio.userId?.name || 'N/A'}`, { x: 200, y: imageY, size: 18 });
+//     imageY -= 30;
+//     // Add portfolio title and details
+//     page.drawText(portfolio.title, { x: margin, y: imageY, size: 14 });
+//     imageY -= 30;
+//     page.drawText(`Unit: ${portfolio.unit?.number} - ${portfolio.unit?.title || ''}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`Criteria: ${portfolio.criteria?.number} - ${portfolio.criteria?.description || ''}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`method: ${portfolio.method || 'N/A'}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`Location: ${portfolio.postcode}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`Task Description: ${portfolio.taskDescription || 'N/A'}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`Job Type: ${portfolio.jobType || 'N/A'}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`Reason For Task: ${portfolio.reasonForTask || 'N/A'}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`objective Of Job: ${portfolio.objectiveOfJob || 'N/A'}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 20;
+//     page.drawText(`Comments: ${portfolio.comments || 'N/A'}`, { x: margin, y: imageY, size: 12 });
+//     imageY -= 40; // Add some extra space before the images
+
+//     // Function to add a new page if no space is left
+//     const checkPageSpace = () => {
+//       if (imageY < 100) {
+//         page = pdfDoc.addPage([600, 800]);
+//         imageY = 750;
+//       }
+//     };
+
+//     // Loop through and embed images
+//     for (const image of portfolio.images) {
+//       const imagePath = path.resolve('/opt/uploads', path.basename(image)); // Use absolute path
+
+//       if (!fs.existsSync(imagePath)) {
+//         console.error('Image not found:', imagePath);
+//         continue; // Skip if the image doesn't exist
+//       }
+
+//       const imageBuffer = fs.readFileSync(imagePath);
+
+//       // Use Sharp to handle rotation based on EXIF metadata
+//       //const { data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true });
+//       let correctedImageBuffer, info;
+//       try {
+//         ({ data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true }));
+//       } catch (err) {
+//         console.error('Skipping corrupted image:', imagePath, err.message);
+//         continue; // Skip this image
+//       }
+
+//       // Handle JPG and PNG files based on output format after correction
+//       let pdfImage;
+//       if (info.format === 'png') {
+//         pdfImage = await pdfDoc.embedPng(correctedImageBuffer);
+//       } else if (info.format === 'jpeg') {
+//         pdfImage = await pdfDoc.embedJpg(correctedImageBuffer);
+//       } else {
+//         console.error('Unsupported image format');
+//         continue; // Skip unsupported images
+//       }
+
+//       // Define a fixed width for all images
+//       const fixedWidth = 200;
+//       const imageDims = pdfImage.scale(fixedWidth / pdfImage.width); // Scale image to fixed width
+
+//       // Check if there's enough space on the current page
+//       if (imageY - imageDims.height < 100) { // Adjust to provide space for logo
+//         // Draw the logo on the current page before adding a new page
+//         const logoImage = await embedLogoImage(pdfDoc);
+//         page.drawImage(logoImage, {
+//           x: page.getWidth() - 150,
+//           y: 30,
+//           width: 100,
+//           height: 50,
+//         });
+
+//         // Add a new page if there's not enough space
+//         page = pdfDoc.addPage([600, 800]);
+//         imageY = 750;
+//       }
+
+//       // Center the image horizontally
+//       page.drawImage(pdfImage, {
+//         x: (600 - imageDims.width) / 2, // Center the image horizontally
+//         y: imageY - imageDims.height,
+//         width: imageDims.width,
+//         height: imageDims.height,
+//       });
+
+//       // Update the Y position for the next image
+//       imageY -= imageDims.height + contentSpacing;
+//     }
+
+//     // Draw the Cranbrook College logo at the bottom right of the last page
+//     const logoImage = await embedLogoImage(pdfDoc);
+//     page.drawImage(logoImage, {
+//       x: page.getWidth() - 150,
+//       y: 30,
+//       width: 100,
+//       height: 50,
+//     });
+
+//     // Function to embed the logo image
+//     async function embedLogoImage(pdfDoc) {
+//       const logoPath = path.join(__dirname, '../public/assets/cranbrook-college-logo.png');
+//       if (!fs.existsSync(logoPath)) {
+//         console.error('Logo file does not exist at:', logoPath);
+//         throw new Error('Logo file not found');
+//       }
+//       const logoBuffer = fs.readFileSync(logoPath);
+//       return await pdfDoc.embedPng(logoBuffer);
+//     }
+
+
+
+
+
+//     // Serialize the PDFDocument to bytes
+//     const pdfBytes = await pdfDoc.save();
+
+//     // Send the PDF to the client
+//     res.set({
+//       'Content-Type': 'application/pdf',
+//       'Content-Disposition': `attachment; filename="${portfolio.title}.pdf"`,
+//     });
+//     res.send(Buffer.from(pdfBytes));
+//   } catch (error) {
+//     console.error('Error exporting PDF:', error);
+//     res.status(500).json({ message: 'Error exporting PDF' });
+//   }
+// });
+
+//aFTER CLAUDE
+// UPDATED: Beautiful Professional PDF Export
 router.get('/:id/export-pdf', async (req, res) => {
   try {
-    const portfolio = await Portfolio.findById(req.params.id).populate('userId', 'name'); // Populate userId to fetch the student's name
+    const portfolio = await Portfolio.findById(req.params.id).populate('userId', 'name');
 
     if (!portfolio) {
       return res.status(404).json({ message: 'Portfolio not found' });
     }
 
-    // Create a new PDF Document
+    // Create PDF Document
     const pdfDoc = await PDFDocument.create();
-    let page = pdfDoc.addPage([600, 800]);
+    let page = pdfDoc.addPage([595, 842]); // A4 size
+    const { width, height } = page.getSize();
 
-    // Define initial Y position and margin
-    let imageY = 750;
+    // Define colors (professional blue theme)
+    const primaryBlue = rgb(0, 0.48, 1); // #007BFF
+    const darkGray = rgb(0.2, 0.2, 0.2);
+    const mediumGray = rgb(0.4, 0.4, 0.4);
+    const lightGray = rgb(0.9, 0.9, 0.9);
+    const white = rgb(1, 1, 1);
+
+    // Margins and spacing
     const margin = 50;
-    const contentSpacing = 20;
+    const contentWidth = width - (2 * margin);
+    let yPosition = height - 60;
 
-    // Add student's name
-    page.drawText(`Student Name: ${portfolio.userId?.name || 'N/A'}`, { x: 200, y: imageY, size: 18 });
-    imageY -= 30;
-    // Add portfolio title and details
-    page.drawText(portfolio.title, { x: margin, y: imageY, size: 14 });
-    imageY -= 30;
-    page.drawText(`Unit: ${portfolio.unit?.number} - ${portfolio.unit?.title || ''}`, { x: margin, y: imageY, size: 12 });
-    imageY -= 20;
-    page.drawText(`Criteria: ${portfolio.criteria?.number} - ${portfolio.criteria?.description || ''}`, { x: margin, y: imageY, size: 12 });
-    imageY -= 20;
-    page.drawText(`method: ${portfolio.method || 'N/A'}`, { x: margin, y: imageY, size: 12 });
-    imageY -= 20;
-    page.drawText(`Location: ${portfolio.postcode}`, { x: margin, y: imageY, size: 12 });
-    imageY -= 20;
-    page.drawText(`Task Description: ${portfolio.taskDescription || 'N/A'}`, { x: margin, y: imageY, size: 12 });
-    imageY -= 20;
-    page.drawText(`Job Type: ${portfolio.jobType || 'N/A'}`, { x: margin, y: imageY, size: 12 });
-    imageY -= 20;
-    page.drawText(`Reason For Task: ${portfolio.reasonForTask || 'N/A'}`, { x: margin, y: imageY, size: 12 });
-    imageY -= 20;
-    page.drawText(`objective Of Job: ${portfolio.objectiveOfJob || 'N/A'}`, { x: margin, y: imageY, size: 12 });
-    imageY -= 20;
-    page.drawText(`Comments: ${portfolio.comments || 'N/A'}`, { x: margin, y: imageY, size: 12 });
-    imageY -= 40; // Add some extra space before the images
+    // ========================================
+    // HEADER SECTION with Blue Background
+    // ========================================
+    // Draw blue header rectangle
+    page.drawRectangle({
+      x: 0,
+      y: height - 120,
+      width: width,
+      height: 120,
+      color: primaryBlue,
+    });
 
-    // Function to add a new page if no space is left
-    const checkPageSpace = () => {
-      if (imageY < 100) {
-        page = pdfDoc.addPage([600, 800]);
-        imageY = 750;
+    // Student Name in header (large, white)
+    const studentName = portfolio.userId?.name || 'Student';
+    page.drawText(studentName, {
+      x: margin,
+      y: height - 50,
+      size: 24,
+      color: white,
+    });
+
+    // Portfolio Title in header (white)
+    page.drawText(portfolio.title, {
+      x: margin,
+      y: height - 80,
+      size: 16,
+      color: white,
+    });
+
+    // Date on right side of header
+    const currentDate = new Date().toLocaleDateString('en-GB');
+    page.drawText(`Date: ${currentDate}`, {
+      x: width - margin - 100,
+      y: height - 50,
+      size: 10,
+      color: white,
+    });
+
+    yPosition = height - 150;
+
+    // ========================================
+    // PORTFOLIO DETAILS SECTION
+    // ========================================
+    // Section title
+    yPosition -= 30;
+    page.drawText('PORTFOLIO DETAILS', {
+      x: margin,
+      y: yPosition,
+      size: 14,
+      color: primaryBlue,
+    });
+
+    // Draw line under section title
+    yPosition -= 5;
+    page.drawLine({
+      start: { x: margin, y: yPosition },
+      end: { x: width - margin, y: yPosition },
+      thickness: 2,
+      color: primaryBlue,
+    });
+
+    yPosition -= 25;
+
+    // Helper function to draw field with label and value
+    const drawField = (label, value, yPos) => {
+      // Label (bold, dark gray)
+      page.drawText(label, {
+        x: margin,
+        y: yPos,
+        size: 10,
+        color: darkGray,
+      });
+
+      // Value (regular, medium gray) - wrap text if too long
+      const maxValueWidth = contentWidth - 150;
+      const valueText = value || 'N/A';
+      
+      // Simple text wrapping
+      if (valueText.length > 80) {
+        const words = valueText.split(' ');
+        let line = '';
+        let lineY = yPos;
+        
+        for (const word of words) {
+          const testLine = line + word + ' ';
+          if (testLine.length * 5 > maxValueWidth) { // Rough estimate
+            page.drawText(line, {
+              x: margin + 150,
+              y: lineY,
+              size: 10,
+              color: mediumGray,
+            });
+            line = word + ' ';
+            lineY -= 15;
+          } else {
+            line = testLine;
+          }
+        }
+        page.drawText(line, {
+          x: margin + 150,
+          y: lineY,
+          size: 10,
+          color: mediumGray,
+        });
+        return lineY - 5; // Return new Y position
+      } else {
+        page.drawText(valueText, {
+          x: margin + 150,
+          y: yPos,
+          size: 10,
+          color: mediumGray,
+        });
+        return yPos - 20; // Normal spacing
       }
     };
 
-    // Loop through and embed images
+    // Draw all fields with better formatting
+    yPosition = drawField('Unit:', `${portfolio.unit?.number || 'N/A'} - ${portfolio.unit?.title || ''}`, yPosition);
+    yPosition -= 5;
+    
+    yPosition = drawField('Learning Outcome:', `${portfolio.learningOutcome?.number || 'N/A'} - ${portfolio.learningOutcome?.description || ''}`, yPosition);
+    yPosition -= 5;
+    
+    yPosition = drawField('Criteria:', `${portfolio.criteria?.number || 'N/A'} - ${portfolio.criteria?.description || ''}`, yPosition);
+    yPosition -= 5;
+    
+    yPosition = drawField('Method:', portfolio.method, yPosition);
+    yPosition -= 5;
+    
+    yPosition = drawField('Location:', portfolio.postcode, yPosition);
+    yPosition -= 10;
+
+    // ========================================
+    // TASK DETAILS SECTION (if space available)
+    // ========================================
+    if (yPosition > 200) {
+      yPosition -= 20;
+      page.drawText('TASK DETAILS', {
+        x: margin,
+        y: yPosition,
+        size: 14,
+        color: primaryBlue,
+      });
+
+      yPosition -= 5;
+      page.drawLine({
+        start: { x: margin, y: yPosition },
+        end: { x: width - margin, y: yPosition },
+        thickness: 2,
+        color: primaryBlue,
+      });
+
+      yPosition -= 25;
+
+      yPosition = drawField('Task Description:', portfolio.taskDescription, yPosition);
+      yPosition -= 5;
+      yPosition = drawField('Job Type:', portfolio.jobType, yPosition);
+      yPosition -= 5;
+      yPosition = drawField('Reason for Task:', portfolio.reasonForTask, yPosition);
+      yPosition -= 5;
+      yPosition = drawField('Objective of Job:', portfolio.objectiveOfJob, yPosition);
+      yPosition -= 5;
+      yPosition = drawField('Comments:', portfolio.comments, yPosition);
+    }
+
+    // ========================================
+    // IMAGES SECTION
+    // ========================================
+    yPosition -= 40;
+    
+    // Check if we need a new page for images
+    if (yPosition < 250) {
+      // Add logo to current page before creating new page
+      await addLogoToPage(page, pdfDoc);
+      
+      page = pdfDoc.addPage([595, 842]);
+      yPosition = height - 60;
+    }
+
+    page.drawText('PORTFOLIO IMAGES', {
+      x: margin,
+      y: yPosition,
+      size: 14,
+      color: primaryBlue,
+    });
+
+    yPosition -= 5;
+    page.drawLine({
+      start: { x: margin, y: yPosition },
+      end: { x: width - margin, y: yPosition },
+      thickness: 2,
+      color: primaryBlue,
+    });
+
+    yPosition -= 30;
+
+    // Process and add images
     for (const image of portfolio.images) {
-      const imagePath = path.resolve('/opt/uploads', path.basename(image)); // Use absolute path
+      const imagePath = path.resolve('/opt/uploads', path.basename(image));
 
       if (!fs.existsSync(imagePath)) {
         console.error('Image not found:', imagePath);
-        continue; // Skip if the image doesn't exist
+        continue;
       }
 
       const imageBuffer = fs.readFileSync(imagePath);
 
-      // Use Sharp to handle rotation based on EXIF metadata
-      //const { data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true });
       let correctedImageBuffer, info;
       try {
-        ({ data: correctedImageBuffer, info } = await sharp(imageBuffer).rotate().toBuffer({ resolveWithObject: true }));
+        ({ data: correctedImageBuffer, info } = await sharp(imageBuffer)
+          .rotate()
+          .toBuffer({ resolveWithObject: true }));
       } catch (err) {
         console.error('Skipping corrupted image:', imagePath, err.message);
-        continue; // Skip this image
+        continue;
       }
 
-      // Handle JPG and PNG files based on output format after correction
       let pdfImage;
       if (info.format === 'png') {
         pdfImage = await pdfDoc.embedPng(correctedImageBuffer);
@@ -694,79 +1022,95 @@ router.get('/:id/export-pdf', async (req, res) => {
         pdfImage = await pdfDoc.embedJpg(correctedImageBuffer);
       } else {
         console.error('Unsupported image format');
-        continue; // Skip unsupported images
+        continue;
       }
 
-      // Define a fixed width for all images
-      const fixedWidth = 200;
-      const imageDims = pdfImage.scale(fixedWidth / pdfImage.width); // Scale image to fixed width
+      // Calculate image dimensions (max width with padding)
+      const maxImageWidth = contentWidth - 40;
+      const maxImageHeight = 350;
+      const imageAspectRatio = pdfImage.width / pdfImage.height;
 
-      // Check if there's enough space on the current page
-      if (imageY - imageDims.height < 100) { // Adjust to provide space for logo
-        // Draw the logo on the current page before adding a new page
-        const logoImage = await embedLogoImage(pdfDoc);
-        page.drawImage(logoImage, {
-          x: page.getWidth() - 150,
-          y: 30,
-          width: 100,
-          height: 50,
-        });
+      let imageWidth = maxImageWidth;
+      let imageHeight = imageWidth / imageAspectRatio;
 
-        // Add a new page if there's not enough space
-        page = pdfDoc.addPage([600, 800]);
-        imageY = 750;
+      if (imageHeight > maxImageHeight) {
+        imageHeight = maxImageHeight;
+        imageWidth = imageHeight * imageAspectRatio;
       }
 
-      // Center the image horizontally
-      page.drawImage(pdfImage, {
-        x: (600 - imageDims.width) / 2, // Center the image horizontally
-        y: imageY - imageDims.height,
-        width: imageDims.width,
-        height: imageDims.height,
+      // Check if we need a new page
+      if (yPosition - imageHeight - 40 < 80) {
+        await addLogoToPage(page, pdfDoc);
+        page = pdfDoc.addPage([595, 842]);
+        yPosition = height - 60;
+      }
+
+      // Draw a light gray border around image
+      page.drawRectangle({
+        x: margin + 20,
+        y: yPosition - imageHeight - 10,
+        width: imageWidth,
+        height: imageHeight + 10,
+        borderColor: lightGray,
+        borderWidth: 2,
       });
 
-      // Update the Y position for the next image
-      imageY -= imageDims.height + contentSpacing;
+      // Center and draw image
+      const imageX = margin + 20 + (imageWidth - imageWidth) / 2;
+      page.drawImage(pdfImage, {
+        x: imageX + 5,
+        y: yPosition - imageHeight - 5,
+        width: imageWidth - 10,
+        height: imageHeight,
+      });
+
+      yPosition -= imageHeight + 30;
     }
 
-    // Draw the Cranbrook College logo at the bottom right of the last page
-    const logoImage = await embedLogoImage(pdfDoc);
-    page.drawImage(logoImage, {
-      x: page.getWidth() - 150,
-      y: 30,
-      width: 100,
-      height: 50,
-    });
+    // ========================================
+    // ADD LOGO TO LAST PAGE
+    // ========================================
+    await addLogoToPage(page, pdfDoc);
 
-    // Function to embed the logo image
-    async function embedLogoImage(pdfDoc) {
-      const logoPath = path.join(__dirname, '../public/assets/cranbrook-college-logo.png');
-      if (!fs.existsSync(logoPath)) {
-        console.error('Logo file does not exist at:', logoPath);
-        throw new Error('Logo file not found');
+    // Helper function to add logo
+    async function addLogoToPage(currentPage, doc) {
+      try {
+        const logoPath = path.join(__dirname, '../public/assets/cranbrook-college-logo.png');
+        if (fs.existsSync(logoPath)) {
+          const logoBuffer = fs.readFileSync(logoPath);
+          const logoImage = await doc.embedPng(logoBuffer);
+          
+          currentPage.drawImage(logoImage, {
+            x: width - 160,
+            y: 20,
+            width: 110,
+            height: 55,
+          });
+        }
+      } catch (error) {
+        console.error('Error adding logo:', error);
       }
-      const logoBuffer = fs.readFileSync(logoPath);
-      return await pdfDoc.embedPng(logoBuffer);
     }
 
-
-
-
-
-    // Serialize the PDFDocument to bytes
+    // ========================================
+    // SAVE AND SEND PDF
+    // ========================================
     const pdfBytes = await pdfDoc.save();
 
-    // Send the PDF to the client
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${portfolio.title}.pdf"`,
+      'Content-Disposition': `attachment; filename="${portfolio.title.replace(/[^a-z0-9]/gi, '_')}.pdf"`,
     });
     res.send(Buffer.from(pdfBytes));
+
   } catch (error) {
     console.error('Error exporting PDF:', error);
     res.status(500).json({ message: 'Error exporting PDF' });
   }
 });
+
+
+
 
 // router.get('/assessor/portfolios', async (req, res) => {
 //   try {
