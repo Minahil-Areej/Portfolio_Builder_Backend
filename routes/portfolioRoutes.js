@@ -227,96 +227,6 @@ router.get('/user-portfolios', async (req, res) => {
 
 
 //The correct one before image addition thing .. it was working with UI
-// router.put('/:id', upload.array('images', 10), async (req, res) => {
-//   try {
-//     const {
-//       title,
-//       unit,
-//       learningOutcome,
-//       criteria,
-//       postcode,
-//       comments,
-//       existingImages,
-//       status,
-//       taskDescription,
-//       jobType,
-//       reasonForTask,
-//       objectiveOfJob,
-//       method,
-//     } = req.body;
-
-//     // ✅ Image Deletion Fix Start
-//     // Parse existing images and handle deletions
-//     let previousImages = existingImages ? JSON.parse(existingImages) : [];
-//     let newImages = [];
-
-//     if (req.files && req.files.length > 0) {
-//       newImages = req.files.map((file) => `uploads/${file.filename}`);
-//     }
-
-//     // Get the current portfolio
-//     const currentPortfolio = await Portfolio.findById(req.params.id);
-//     if (!currentPortfolio) {
-//       return res.status(404).json({ message: 'Portfolio not found' });
-//     }
-
-//     // Identify deleted images
-//     const removedImages = currentPortfolio.images.filter(
-//       (img) => !previousImages.includes(img)
-//     );
-
-//     // Remove deleted images from filesystem
-//     removedImages.forEach((imgPath) => {
-//       const absolutePath = path.resolve('/opt/uploads', path.basename(imgPath));
-//       if (fs.existsSync(absolutePath)) {
-//         fs.unlinkSync(absolutePath);
-//       }
-//     });
-
-//     // Combine remaining + new images
-//     const updatedImages = [...previousImages, ...newImages];
-//     // ✅ Image Deletion Fix End
-
-//     const updateFields = {
-//       title: title || currentPortfolio.title,
-//       unit: unit ? JSON.parse(unit) : currentPortfolio.unit,
-//       learningOutcome: learningOutcome
-//         ? JSON.parse(learningOutcome)
-//         : currentPortfolio.learningOutcome,
-//       criteria: criteria ? JSON.parse(criteria) : currentPortfolio.criteria,
-//       postcode: postcode || currentPortfolio.postcode,
-//       images: updatedImages,
-//       status: status || currentPortfolio.status,
-//       jobType: jobType !== undefined ? jobType : currentPortfolio.jobType,
-//       reasonForTask: reasonForTask !== undefined ? reasonForTask : currentPortfolio.reasonForTask,
-//       objectiveOfJob: objectiveOfJob !== undefined ? objectiveOfJob : currentPortfolio.objectiveOfJob,
-//       taskDescription: taskDescription !== undefined ? taskDescription : currentPortfolio.taskDescription,
-//       method: method !== undefined ? method : currentPortfolio.method,
-//       comments: comments !== undefined ? comments : currentPortfolio.comments,
-
-//     };
-
-//     // Increment submission count if transitioning from Reviewed to Draft
-//     if (currentPortfolio.status === 'Reviewed' && status === 'Draft') {
-//       updateFields.submissionCount = (currentPortfolio.submissionCount || 0) + 1;
-//     }
-
-//     const updatedPortfolio = await Portfolio.findByIdAndUpdate(
-//       req.params.id,
-//       updateFields,
-//       { new: true }
-//     );
-
-//     res.status(200).json({
-//       message: 'Portfolio updated successfully',
-//       portfolio: updatedPortfolio,
-//     });
-//   } catch (error) {
-//     console.error('Error updating portfolio:', error);
-//     res.status(500).json({ message: 'Error updating portfolio' });
-//   }
-// });
-
 router.put('/:id', upload.array('images', 10), async (req, res) => {
   try {
     const {
@@ -338,17 +248,10 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
     // ✅ Image Deletion Fix Start
     // Parse existing images and handle deletions
     let previousImages = existingImages ? JSON.parse(existingImages) : [];
-    // ✅ Ensure backward compatibility: convert old string-only images to objects
-    previousImages = previousImages.map((img) =>
-      typeof img === 'string' ? { url: img, caption: '' } : img
-    );
+    let newImages = [];
 
-   let newImages = [];
     if (req.files && req.files.length > 0) {
-      newImages = req.files.map((file) => ({
-        url: `uploads/${file.filename}`,
-        caption: '',
-      }));
+      newImages = req.files.map((file) => `uploads/${file.filename}`);
     }
 
     // Get the current portfolio
@@ -413,6 +316,7 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
     res.status(500).json({ message: 'Error updating portfolio' });
   }
 });
+
 
 
 
