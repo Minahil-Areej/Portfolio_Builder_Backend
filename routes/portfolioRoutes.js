@@ -166,139 +166,49 @@ router.get('/user-portfolios', async (req, res) => {
 
 
 //THE CORRECT ONE BEFORE CHNGE
-// router.put('/:id', upload.array('images', 10), async (req, res) => {
-//   try {
-//     const { title, unit, learningOutcome, criteria, postcode, comments, existingImages, status, taskDescription,
-//       jobType,
-//       reasonForTask,
-//       objectiveOfJob,
-//       method } = req.body;
-
-//     // Parse the existing images from the request body
-//     let previousImages = existingImages ? JSON.parse(existingImages) : [];
-
-//     // Add new images if any
-//     let newImages = [];
-//     if (req.files && req.files.length > 0) {
-//       newImages = req.files.map((file) => `uploads/${file.filename}`); // Save relative path
-
-//     }
-
-//     // Merge existing and new images
-//     const updatedImages = [...previousImages, ...newImages];
-
-//     // Fetch the current portfolio
-//     const currentPortfolio = await Portfolio.findById(req.params.id);
-//     if (!currentPortfolio) {
-//       return res.status(404).json({ message: 'Portfolio not found' });
-//     }
-
-//     // Build the update object
-//     const updateFields = {
-//       title: title || currentPortfolio.title, // Retain existing title if not provided
-//       unit: unit ? JSON.parse(unit) : currentPortfolio.unit,
-//       learningOutcome: learningOutcome ? JSON.parse(learningOutcome) : currentPortfolio.learningOutcome,
-//       criteria: criteria ? JSON.parse(criteria) : currentPortfolio.criteria,
-//       postcode: postcode || currentPortfolio.postcode,
-//       // statement: statement || currentPortfolio.statement,
-//       comments: comments || currentPortfolio.comments,
-//       images: newImages.length > 0 ? updatedImages : currentPortfolio.images, // Update images only if new ones are provided
-//       status: status || currentPortfolio.status, // Update status if provided
-//       taskDescription: taskDescription || currentPortfolio.taskDescription,
-//       jobType: jobType || currentPortfolio.jobType,
-//       reasonForTask: reasonForTask || currentPortfolio.reasonForTask,
-//       objectiveOfJob: objectiveOfJob || currentPortfolio.objectiveOfJob,
-//       method: method || currentPortfolio.method,
-//     };
-
-//     // Increment submission count if transitioning from Reviewed to Draft
-//     if (currentPortfolio.status === 'Reviewed' && status === 'Draft') {
-//       updateFields.submissionCount = (currentPortfolio.submissionCount || 0) + 1;
-//     }
-
-//     const updatedPortfolio = await Portfolio.findByIdAndUpdate(req.params.id, updateFields, { new: true });
-
-//     res.status(200).json({ message: 'Portfolio updated successfully', portfolio: updatedPortfolio });
-//   } catch (error) {
-//     console.error('Error updating portfolio:', error);
-//     res.status(500).json({ message: 'Error updating portfolio' });
-//   }
-// });
-
-
-//The correct one before image addition thing .. it was working with UI
 router.put('/:id', upload.array('images', 10), async (req, res) => {
   try {
-    const {
-      title,
-      unit,
-      learningOutcome,
-      criteria,
-      postcode,
-      comments,
-      existingImages,
-      status,
-      taskDescription,
+    const { title, unit, learningOutcome, criteria, postcode, comments, existingImages, status, taskDescription,
       jobType,
       reasonForTask,
       objectiveOfJob,
-      method,
-    } = req.body;
+      method } = req.body;
 
-    // ✅ Image Deletion Fix Start
-    // Parse existing images and handle deletions
+    // Parse the existing images from the request body
     let previousImages = existingImages ? JSON.parse(existingImages) : [];
-    let newImages = [];
 
+    // Add new images if any
+    let newImages = [];
     if (req.files && req.files.length > 0) {
-      newImages = req.files.map((file) => `uploads/${file.filename}`);
+      newImages = req.files.map((file) => `uploads/${file.filename}`); // Save relative path
+
     }
 
-    // Get the current portfolio
+    // Merge existing and new images
+    const updatedImages = [...previousImages, ...newImages];
+
+    // Fetch the current portfolio
     const currentPortfolio = await Portfolio.findById(req.params.id);
     if (!currentPortfolio) {
       return res.status(404).json({ message: 'Portfolio not found' });
     }
 
-    // Identify deleted images
-    const removedImages = currentPortfolio.images.filter(
-      (img) => !previousImages.includes(img)
-    );
-
-    // Remove deleted images from filesystem
-    removedImages.forEach((imgPath) => {
-      const absolutePath = path.resolve('/opt/uploads', path.basename(imgPath));
-      if (fs.existsSync(absolutePath)) {
-        fs.unlinkSync(absolutePath);
-      }
-    });
-
-    // Combine remaining + new images
-    //**fixing image empty issue while moving from draft to to be reviewd */
-    const updatedImages = previousImages.length > 0 || newImages.length > 0
-      ? [...previousImages, ...newImages]
-      : currentPortfolio.images;
-
-    //const updatedImages = [...previousImages, ...newImages];
-    // ✅ Image Deletion Fix End
-
+    // Build the update object
     const updateFields = {
-      title: title || currentPortfolio.title,
+      title: title || currentPortfolio.title, // Retain existing title if not provided
       unit: unit ? JSON.parse(unit) : currentPortfolio.unit,
-      learningOutcome: learningOutcome
-        ? JSON.parse(learningOutcome)
-        : currentPortfolio.learningOutcome,
+      learningOutcome: learningOutcome ? JSON.parse(learningOutcome) : currentPortfolio.learningOutcome,
       criteria: criteria ? JSON.parse(criteria) : currentPortfolio.criteria,
       postcode: postcode || currentPortfolio.postcode,
-      images: updatedImages,
-      status: status || currentPortfolio.status,
-      jobType: jobType !== undefined ? jobType : currentPortfolio.jobType,
-      reasonForTask: reasonForTask !== undefined ? reasonForTask : currentPortfolio.reasonForTask,
-      objectiveOfJob: objectiveOfJob !== undefined ? objectiveOfJob : currentPortfolio.objectiveOfJob,
-      taskDescription: taskDescription !== undefined ? taskDescription : currentPortfolio.taskDescription,
-      method: method !== undefined ? method : currentPortfolio.method,
-      comments: comments !== undefined ? comments : currentPortfolio.comments,
-
+      // statement: statement || currentPortfolio.statement,
+      comments: comments || currentPortfolio.comments,
+      images: newImages.length > 0 ? updatedImages : currentPortfolio.images, // Update images only if new ones are provided
+      status: status || currentPortfolio.status, // Update status if provided
+      taskDescription: taskDescription || currentPortfolio.taskDescription,
+      jobType: jobType || currentPortfolio.jobType,
+      reasonForTask: reasonForTask || currentPortfolio.reasonForTask,
+      objectiveOfJob: objectiveOfJob || currentPortfolio.objectiveOfJob,
+      method: method || currentPortfolio.method,
     };
 
     // Increment submission count if transitioning from Reviewed to Draft
@@ -306,21 +216,111 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
       updateFields.submissionCount = (currentPortfolio.submissionCount || 0) + 1;
     }
 
-    const updatedPortfolio = await Portfolio.findByIdAndUpdate(
-      req.params.id,
-      updateFields,
-      { new: true }
-    );
+    const updatedPortfolio = await Portfolio.findByIdAndUpdate(req.params.id, updateFields, { new: true });
 
-    res.status(200).json({
-      message: 'Portfolio updated successfully',
-      portfolio: updatedPortfolio,
-    });
+    res.status(200).json({ message: 'Portfolio updated successfully', portfolio: updatedPortfolio });
   } catch (error) {
     console.error('Error updating portfolio:', error);
     res.status(500).json({ message: 'Error updating portfolio' });
   }
 });
+
+
+//The correct one before image addition thing .. it was working with UI
+// router.put('/:id', upload.array('images', 10), async (req, res) => {
+//   try {
+//     const {
+//       title,
+//       unit,
+//       learningOutcome,
+//       criteria,
+//       postcode,
+//       comments,
+//       existingImages,
+//       status,
+//       taskDescription,
+//       jobType,
+//       reasonForTask,
+//       objectiveOfJob,
+//       method,
+//     } = req.body;
+
+//     // ✅ Image Deletion Fix Start
+//     // Parse existing images and handle deletions
+//     let previousImages = existingImages ? JSON.parse(existingImages) : [];
+//     let newImages = [];
+
+//     if (req.files && req.files.length > 0) {
+//       newImages = req.files.map((file) => `uploads/${file.filename}`);
+//     }
+
+//     // Get the current portfolio
+//     const currentPortfolio = await Portfolio.findById(req.params.id);
+//     if (!currentPortfolio) {
+//       return res.status(404).json({ message: 'Portfolio not found' });
+//     }
+
+//     // Identify deleted images
+//     const removedImages = currentPortfolio.images.filter(
+//       (img) => !previousImages.includes(img)
+//     );
+
+//     // Remove deleted images from filesystem
+//     removedImages.forEach((imgPath) => {
+//       const absolutePath = path.resolve('/opt/uploads', path.basename(imgPath));
+//       if (fs.existsSync(absolutePath)) {
+//         fs.unlinkSync(absolutePath);
+//       }
+//     });
+
+//     // Combine remaining + new images
+//     //**fixing image empty issue while moving from draft to to be reviewd */
+//     const updatedImages = previousImages.length > 0 || newImages.length > 0
+//       ? [...previousImages, ...newImages]
+//       : currentPortfolio.images;
+
+//     //const updatedImages = [...previousImages, ...newImages];
+//     // ✅ Image Deletion Fix End
+
+//     const updateFields = {
+//       title: title || currentPortfolio.title,
+//       unit: unit ? JSON.parse(unit) : currentPortfolio.unit,
+//       learningOutcome: learningOutcome
+//         ? JSON.parse(learningOutcome)
+//         : currentPortfolio.learningOutcome,
+//       criteria: criteria ? JSON.parse(criteria) : currentPortfolio.criteria,
+//       postcode: postcode || currentPortfolio.postcode,
+//       images: updatedImages,
+//       status: status || currentPortfolio.status,
+//       jobType: jobType !== undefined ? jobType : currentPortfolio.jobType,
+//       reasonForTask: reasonForTask !== undefined ? reasonForTask : currentPortfolio.reasonForTask,
+//       objectiveOfJob: objectiveOfJob !== undefined ? objectiveOfJob : currentPortfolio.objectiveOfJob,
+//       taskDescription: taskDescription !== undefined ? taskDescription : currentPortfolio.taskDescription,
+//       method: method !== undefined ? method : currentPortfolio.method,
+//       comments: comments !== undefined ? comments : currentPortfolio.comments,
+
+//     };
+
+//     // Increment submission count if transitioning from Reviewed to Draft
+//     if (currentPortfolio.status === 'Reviewed' && status === 'Draft') {
+//       updateFields.submissionCount = (currentPortfolio.submissionCount || 0) + 1;
+//     }
+
+//     const updatedPortfolio = await Portfolio.findByIdAndUpdate(
+//       req.params.id,
+//       updateFields,
+//       { new: true }
+//     );
+
+//     res.status(200).json({
+//       message: 'Portfolio updated successfully',
+//       portfolio: updatedPortfolio,
+//     });
+//   } catch (error) {
+//     console.error('Error updating portfolio:', error);
+//     res.status(500).json({ message: 'Error updating portfolio' });
+//   }
+// });
 
 
 
