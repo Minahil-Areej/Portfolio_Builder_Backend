@@ -274,7 +274,12 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
     });
 
     // Combine remaining + new images
-    const updatedImages = [...previousImages, ...newImages];
+    //**fixing image empty issue while moving from draft to to be reviewd */
+    const updatedImages = previousImages.length > 0 || newImages.length > 0
+      ? [...previousImages, ...newImages]
+      : currentPortfolio.images;
+
+    //const updatedImages = [...previousImages, ...newImages];
     // ✅ Image Deletion Fix End
 
     const updateFields = {
